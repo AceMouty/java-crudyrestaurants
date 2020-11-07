@@ -1,11 +1,10 @@
 package com.lambdaschool.crudyrestaurants.models;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The entity allowing interaction with the restaurants table.
@@ -54,6 +53,24 @@ public class Restaurant
      */
     private int seatcapacity;
 
+    // When handling a collection in the table relationship we wont put the field in the
+    // constructor, rather we will handle it in a different way.
+    @OneToMany(
+            mappedBy = "restaurant", //use mapped by bc menus is a collection, mapped by a field in the table you are relating to
+            cascade = CascadeType.ALL, // what ever you do to restaurant do to menu items
+            orphanRemoval = true // if there is a menu that is ever NOT related to a restaurant, get rid of it.
+    )
+    private List<Menu> menus = new ArrayList<>();
+
+    // Connect restaurant to payment
+    @ManyToMany
+    @JoinTable(
+            name = "restaurantpayments", // name of the junction table
+            joinColumns = @JoinColumn( name = "restaurantid"), // a column to go into the junction table, this MUST be a primary key
+            inverseJoinColumns = @JoinColumn(name = "paymentid") // the other column to include in the junction table that is also a primary key
+    )
+    // Many to many collection use a set, Java Sets enforce uniqueness that we want here
+    private Set<Payment> payments = new HashSet<>();
     /**
      * Default constructor used primarily by the JPA.
      */
@@ -228,5 +245,25 @@ public class Restaurant
     public void setSeatcapacity(int seatcapacity)
     {
         this.seatcapacity = seatcapacity;
+    }
+
+    public List<Menu> getMenus()
+    {
+        return menus;
+    }
+
+    public void setMenus(List<Menu> menus)
+    {
+        this.menus = menus;
+    }
+
+    public Set<Payment> getPayments()
+    {
+        return payments;
+    }
+
+    public void setPayments(Set<Payment> paymetns)
+    {
+        this.payments = paymetns;
     }
 }
